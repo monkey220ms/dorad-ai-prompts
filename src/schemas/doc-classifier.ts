@@ -55,6 +55,20 @@ export function assertDocClassifier(obj: unknown): asserts obj is DocClassifierO
     throw new Error("contains_pii must be boolean");
   }
   if (typeof o.notes !== "string") {
-    throw new Error("notes must be a string");
+    throw new Error("notes must be a string (use \"\" if none)");
+  }
+  if (typeof o.currency !== "string" || o.currency.length === 0) {
+    throw new Error("currency required (e.g. 'USD')");
+  }
+  if (typeof o.pages_estimated !== "number" || o.pages_estimated < 0) {
+    throw new Error("pages_estimated must be a non-negative number");
+  }
+  const tp = o.time_period as Record<string, unknown> | undefined;
+  if (!tp) throw new Error("time_period required");
+  for (const k of ["start", "end", "label"]) {
+    const v = tp[k];
+    if (v !== null && typeof v !== "string") {
+      throw new Error(`time_period.${k} must be string|null`);
+    }
   }
 }

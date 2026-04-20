@@ -111,4 +111,4 @@ ${JSON.stringify(input.candidates, null, 2)}
   };
 }
 
-export const STAGE_4_PROMPT_VERSION = "stage4.v1.0";
+export const STAGE_4_PROMPT_VERSION = "stage4-comps.v1.0";

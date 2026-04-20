@@ -165,8 +165,8 @@ function parseJsonLenient(text: string): unknown {
   const first = t.indexOf("{");
   const last = t.lastIndexOf("}");
   if (first === -1 || last === -1 || last <= first) {
-    throw new Error("no JSON object found in response");
+    throw new Error("response does not contain a JSON object");
   }
-  const candidate = t.slice(first, last + 1);
-  return JSON.parse(candidate);
+  const slice = t.slice(first, last + 1);
+  return JSON.parse(slice);
 }

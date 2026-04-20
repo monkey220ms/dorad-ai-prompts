@@ -21,6 +21,9 @@ import { assertLoi } from "../src/schemas/loi.ts";
 import { assertIcMemo } from "../src/schemas/ic-memo.ts";
 import { assertSanityCheck } from "../src/schemas/sanity-check.ts";
 import { runFinancialMathCheck } from "../src/schemas/financial-parser.ts";
+import { assertValuationRange } from "../src/schemas/valuation-range.ts";
+import { assertBrokerOutreach } from "../src/schemas/broker-outreach.ts";
+import { matchBenchmark, INDUSTRY_BENCHMARKS } from "../src/data/industry-benchmarks.ts";
 
 let passed = 0;
 let failed = 0;
@@ -584,6 +587,102 @@ describe("assertSanityCheck", () => {
 });
 
 /* ================================================================== */
+/* Stage 15 — Valuation Range                                          */
+/* ================================================================== */
+
+describe("assertValuationRange", () => {
+  test("accepts a well-formed triangulated range", () => {
+    assertValuationRange(wellFormedValuation());
+  });
+
+  test("rejects weights that do not sum to 1.0", () => {
+    const bad = wellFormedValuation();
+    bad.method_results[0].weight = 0.8; // sum becomes 1.3
+    expectThrow(() => assertValuationRange(bad), "weights");
+  });
+
+  test("rejects non-monotonic percentiles", () => {
+    const bad = wellFormedValuation();
+    bad.triangulated_range.p25 = bad.triangulated_range.p75 + 1;
+    expectThrow(() => assertValuationRange(bad), "monoton");
+  });
+
+  test("rejects unknown method name", () => {
+    const bad = wellFormedValuation();
+    // deliberately set to an invalid method name; fixture types are literal unions so cast through unknown
+    (bad.method_results[0] as unknown as { method: string }).method = "tarot_card";
+    expectThrow(() => assertValuationRange(bad), "method");
+  });
+});
+
+/* ================================================================== */
+/* Stage 15a — Broker Outreach                                         */
+/* ================================================================== */
+
+describe("assertBrokerOutreach", () => {
+  test("accepts a well-formed 3-tone sequence", () => {
+    assertBrokerOutreach(wellFormedOutreach());
+  });
+
+  test("rejects duplicate tones", () => {
+    const bad = wellFormedOutreach();
+    bad.sequences[1].tone = "direct"; // matches sequences[0].tone
+    expectThrow(() => assertBrokerOutreach(bad), "duplicate tone");
+  });
+
+  test("rejects unknown tone", () => {
+    const bad = wellFormedOutreach();
+    bad.sequences[0].tone = "chaotic";
+    expectThrow(() => assertBrokerOutreach(bad), "unknown tone");
+  });
+
+  test("rejects missing email bodies", () => {
+    const bad = wellFormedOutreach();
+    bad.sequences[0].email_1.body = "";
+    expectThrow(() => assertBrokerOutreach(bad), "body too short");
+  });
+
+  test("rejects fewer than 3 sequences", () => {
+    const bad = wellFormedOutreach();
+    bad.sequences = bad.sequences.slice(0, 2);
+    expectThrow(() => assertBrokerOutreach(bad), "3 tone sequences");
+  });
+});
+
+/* ================================================================== */
+/* Industry Benchmarks dataset                                         */
+/* ================================================================== */
+
+describe("industry benchmarks", () => {
+  test("dataset has at least 10 entries", () => {
+    if (INDUSTRY_BENCHMARKS.length < 10) {
+      throw new Error(`expected ≥10 benchmarks, got ${INDUSTRY_BENCHMARKS.length}`);
+    }
+  });
+
+  test("every benchmark has unique key", () => {
+    const keys = INDUSTRY_BENCHMARKS.map((b) => b.key);
+    if (new Set(keys).size !== keys.length) {
+      throw new Error("duplicate benchmark keys");
+    }
+  });
+
+  test("matchBenchmark returns generic for unknown label", () => {
+    const b = matchBenchmark({ label: "quantum_widget_foundry_42" });
+    if (b.key !== "generic_smb_default") {
+      throw new Error(`expected fallback, got ${b.key}`);
+    }
+  });
+
+  test("matchBenchmark resolves hvac label", () => {
+    const b = matchBenchmark({ label: "HVAC and Plumbing services" });
+    if (!b.key.includes("hvac")) {
+      throw new Error(`expected hvac match, got ${b.key}`);
+    }
+  });
+});
+
+/* ================================================================== */
 
 console.log(`\n${"─".repeat(60)}`);
 console.log(`${passed + failed} tests — ${passed} passed, ${failed} failed`);
@@ -661,27 +760,193 @@ function wellFormedInitialScreen() {
   };
 }
 
+function wellFormedValuation() {
+  return {
+    method_results: [
+      {
+        method: "sde_multiple",
+        point_estimate: 1_200_000,
+        p10: 1_050_000,
+        p90: 1_350_000,
+        inputs: { sde: 400_000, multiple: 3.0 },
+        weight: 0.35,
+        confidence: 0.8,
+        rationale: "SDE 400k x industry-adjusted 3.0x.",
+        notes: null as string | null,
+        not_applicable_reason: null as string | null,
+      },
+      {
+        method: "ebitda_multiple",
+        point_estimate: 1_100_000,
+        p10: 950_000,
+        p90: 1_250_000,
+        inputs: { ebitda: 350_000, multiple: 3.15 },
+        weight: 0.25,
+        confidence: 0.7,
+        rationale: "EBITDA x 3.15x.",
+        notes: null as string | null,
+        not_applicable_reason: null as string | null,
+      },
+      {
+        method: "dcf",
+        point_estimate: 1_150_000,
+        p10: 980_000,
+        p90: 1_320_000,
+        inputs: { discount_rate: 0.12, growth: 0.03 },
+        weight: 0.25,
+        confidence: 0.65,
+        rationale: "5yr levered FCF + TV.",
+        notes: null as string | null,
+        not_applicable_reason: null as string | null,
+      },
+      {
+        method: "asset_based",
+        point_estimate: 700_000,
+        p10: 600_000,
+        p90: 800_000,
+        inputs: { tangible: 500_000, goodwill: 200_000 },
+        weight: 0.15,
+        confidence: 0.5,
+        rationale: "Tangible + goodwill floor.",
+        notes: null as string | null,
+        not_applicable_reason: null as string | null,
+      },
+    ],
+    triangulated_range: {
+      p10: 900_000,
+      p25: 1_000_000,
+      p50: 1_100_000,
+      p75: 1_200_000,
+      p90: 1_300_000,
+      midpoint: 1_100_000,
+      range_tightness: "medium" as const,
+      std_dev: 80_000,
+    },
+    ask_vs_range: {
+      asking_price: 1_200_000,
+      midpoint: 1_100_000,
+      pct_above_midpoint: 0.0909,
+      verdict: "fair" as const,
+      ask_percentile_bucket: "p50_p75" as const,
+      negotiation_guidance:
+        "Ask is 9% above midpoint. Anchor counter near P25 (~$1.00M) and justify with QofE findings.",
+      suggested_counter_offer: 1_050_000,
+    },
+    multiples_used: {
+      sde_multiple_low: 2.5,
+      sde_multiple_mid: 3.0,
+      sde_multiple_high: 3.5,
+      ebitda_multiple_low: 2.75,
+      ebitda_multiple_mid: 3.15,
+      ebitda_multiple_high: 3.6,
+      source: "industry_benchmarks.v1:hvac_plumbing",
+    },
+    dcf_assumptions: {
+      wacc: 0.14,
+      terminal_growth_rate: 0.025,
+      projection_years: 5,
+      revenue_cagr: 0.06,
+      terminal_ebitda_multiple: 4.0,
+    },
+    value_drivers: [
+      "Recurring service contracts",
+      "Strong margin profile",
+      "Tenured technician team",
+    ],
+    value_detractors: [
+      "Key-man concentration on owner",
+      "Lease expires in 2 years",
+      "Top customer 22% of revenue",
+    ],
+    confidence_overall: 0.72,
+    coverage_notes:
+      "Tighten range with signed QofE, customer-by-customer revenue mix, and confirmed lease renewal terms.",
+    prompt_version: "stage15-valuation-range.v1",
+  };
+}
+
+function wellFormedOutreach() {
+  const makeEmail = (referencedIds: string[] = []) => ({
+    subject: "Quick question on Acme listing",
+    body:
+      "Hi,\n\nI saw the listing for Acme and I'd like to ask a couple of quick questions before scheduling a call. I'm a self-funded buyer looking at service businesses in the Midwest.\n\nWould 15 minutes this week work for an intro call? I can do Tues or Wed afternoon.\n\nThanks.",
+    rationale: "Leads with intent, asks for a time window, keeps it tight.",
+    send_after: "now",
+    referenced_question_ids: referencedIds,
+  });
+  return {
+    deal_hook: "Established, owner-retiring plumbing business",
+    buyer_framing: "Self-funded operator focused on Midwest trades.",
+    sequences: [
+      {
+        tone: "direct",
+        email_1: makeEmail(["Q-P0-01"]),
+        email_2: makeEmail(["Q-P1-01"]),
+        email_3: makeEmail([]),
+      },
+      {
+        tone: "warm",
+        email_1: makeEmail(["Q-P0-01"]),
+        email_2: makeEmail(["Q-P1-02"]),
+        email_3: makeEmail([]),
+      },
+      {
+        tone: "curious",
+        email_1: makeEmail(["Q-P0-02"]),
+        email_2: makeEmail(["Q-P1-03"]),
+        email_3: makeEmail([]),
+      },
+    ],
+    asks_for_other_parties: [
+      { party: "cpa", ask: "Review 3yr tax returns for add-back defensibility" },
+    ],
+    dont_say: [
+      "Don't disclose full SBA pre-approval amount",
+      "Don't mention current bid ceiling",
+    ],
+    tone_recommendation: {
+      primary: "warm",
+      rationale: "Most SMB brokers respond best to warm tone.",
+    },
+  };
+}
+
 function validLoi() {
   return {
     rendered_loi_text: "This LOI is non-binding. " + "Full text goes here. ".repeat(30),
     structured: {
-      parties: { buyer_entity_placeholder: "[BUYER]", seller_entity_placeholder: "[SELLER]", target_business_name: "Acme" },
-      transaction_structure: "asset_purchase" as const,
-      purchase_price: {
-        total: 1_000_000, cash_at_close: 1_000_000,
-        seller_note: null, earnout: null, escrow: 0,
+      parties: {
+        buyer_entity_placeholder: "[BUYER]",
+        seller_entity_placeholder: "[SELLER]",
+        target_business_name: "Acme",
       },
-      working_capital_target: "normalized",
-      assets_included: [], assets_excluded: [],
-      contingencies: [],
-      due_diligence_days: 30,
+      transaction_structure: "asset_purchase",
+      purchase_price: {
+        total: 1_000_000,
+        cash_at_close: 900_000,
+        seller_note: {
+          amount: 100_000,
+          term_months: 60,
+          rate_pct: 6.5,
+          first_payment_deferred_months: 0,
+          amortization_type: "standard",
+        },
+        earnout: null,
+        escrow: 25_000,
+      },
+      working_capital_target: "normalized 3-mo avg",
+      assets_included: ["FF&E", "goodwill"],
+      assets_excluded: ["cash"],
+      contingencies: ["SBA approval", "satisfactory DD"],
+      due_diligence_days: 45,
       exclusivity_days: 30,
       confidentiality_included: true,
-      proposed_close_date: "2026-09-01",
-      broker_commission_note: "x",
-      offer_expiration_date: "2026-05-15",
+      proposed_close_date: "2026-07-01",
+      broker_commission_note: "Per listing agreement.",
+      offer_expiration_date: "2026-05-01",
     },
-    negotiation_notes_for_buyer: [],
+    negotiation_notes_for_buyer: ["Hold firm on 30-day exclusivity"],
     legal_disclaimer: "This LOI is non-binding except for exclusivity and confidentiality.",
   };
 }
+  

@@ -72,5 +72,8 @@ export function assertSanityCheck(obj: unknown): asserts obj is SanityCheckOutpu
     if (!["p0", "p1", "p2"].includes(a0.priority as string)) {
       throw new Error(`suggested_actions[${i}].priority invalid`);
     }
+    if (typeof a0.rationale !== "string") {
+      throw new Error(`suggested_actions[${i}].rationale required`);
+    }
   }
 }

@@ -73,7 +73,7 @@ export function assertModelBuilder(obj: unknown): asserts obj is ModelBuilderOut
       throw new Error(`scenarios[${i}].created_by must be "ai" or "user"`);
     }
   }
-  if (typeof o.narrative_summary !== "string") {
+  if (typeof o.narrative_summary !== "string" || o.narrative_summary.length === 0) {
     throw new Error("narrative_summary required");
   }
 }

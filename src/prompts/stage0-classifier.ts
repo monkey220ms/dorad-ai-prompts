@@ -55,5 +55,3 @@ export async function classifyDoc(input: ClassifyDocInput, apiKey?: string): Pro
     model_used: res.model_used,
   };
 }
-
-export const STAGE_0_PROMPT_VERSION = "stage0.v1.0";

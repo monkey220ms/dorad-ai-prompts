@@ -137,6 +137,8 @@ export function assertSellerCall(obj: unknown): asserts obj is SellerCallOutput 
   const td = o.updated_thesis_delta as Record<string, unknown>;
   if (!td) throw new Error("updated_thesis_delta required");
   for (const k of ["was_more_confident_in", "am_less_confident_in", "must_verify_next"]) {
-    if (!Array.isArray(td[k])) throw new Error(`updated_thesis_delta.${k} must be array`);
+    if (!Array.isArray(td[k])) {
+      throw new Error(`updated_thesis_delta.${k} must be array`);
+    }
   }
 }

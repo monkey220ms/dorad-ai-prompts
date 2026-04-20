@@ -121,4 +121,4 @@ ${JSON.stringify(input.assumptionDeltas, null, 2)}
   };
 }
 
-export const STAGE_11_PROMPT_VERSION = "stage11.v1.0";
+export const STAGE_11_PROMPT_VERSION = "stage11-sanity-check.v1.0";

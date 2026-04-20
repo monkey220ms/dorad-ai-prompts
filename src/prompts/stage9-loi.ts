@@ -152,4 +152,4 @@ ${JSON.stringify(input.userPrefs, null, 2)}
   };
 }
 
-export const STAGE_9_PROMPT_VERSION = "stage9.v1.0";
+export const STAGE_9_PROMPT_VERSION = "stage9-loi.v1.0";

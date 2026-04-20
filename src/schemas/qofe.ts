@@ -110,4 +110,7 @@ export function assertQofe(obj: unknown): asserts obj is QofeOutput {
   ) {
     throw new Error("overall_quality_score must be 0-100");
   }
+  if (typeof o.overall_notes !== "string") {
+    throw new Error("overall_notes required (use \"\" if none)");
+  }
 }

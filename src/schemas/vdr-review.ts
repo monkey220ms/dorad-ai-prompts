@@ -100,4 +100,15 @@ export function assertVdrReview(obj: unknown): asserts obj is VdrReviewOutput {
   if (!Array.isArray(o.quality_findings_in_present_docs)) {
     throw new Error("quality_findings_in_present_docs must be array");
   }
+  for (const [i, q0] of (o.quality_findings_in_present_docs as Array<Record<string, unknown>>).entries()) {
+    if (typeof q0.document_id !== "string") {
+      throw new Error(`quality_findings_in_present_docs[${i}].document_id required`);
+    }
+    if (typeof q0.finding !== "string") {
+      throw new Error(`quality_findings_in_present_docs[${i}].finding required`);
+    }
+    if (!SEV.includes(q0.severity as string)) {
+      throw new Error(`quality_findings_in_present_docs[${i}].severity invalid`);
+    }
+  }
 }

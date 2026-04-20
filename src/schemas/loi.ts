@@ -101,4 +101,27 @@ export function assertLoi(obj: unknown): asserts obj is LoiOutput {
   if (!Array.isArray(o.negotiation_notes_for_buyer)) {
     throw new Error("negotiation_notes_for_buyer must be array");
   }
+  if (typeof s.working_capital_target !== "string") {
+    throw new Error("structured.working_capital_target required");
+  }
+  if (!Array.isArray(s.assets_included)) {
+    throw new Error("structured.assets_included must be array");
+  }
+  if (!Array.isArray(s.assets_excluded)) {
+    throw new Error("structured.assets_excluded must be array");
+  }
+  if (typeof s.confidentiality_included !== "boolean") {
+    throw new Error("structured.confidentiality_included must be boolean");
+  }
+  const parties = s.parties as Record<string, unknown> | undefined;
+  if (!parties) throw new Error("structured.parties required");
+  for (const k of [
+    "buyer_entity_placeholder",
+    "seller_entity_placeholder",
+    "target_business_name",
+  ]) {
+    if (typeof parties[k] !== "string") {
+      throw new Error(`structured.parties.${k} required`);
+    }
+  }
 }

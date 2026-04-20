@@ -222,4 +222,4 @@ ${JSON.stringify(input.financingPreference, null, 2)}
   };
 }
 
-export const STAGE_8_PROMPT_VERSION = "stage8.v1.0";
+export const STAGE_8_PROMPT_VERSION = "stage8-model-builder.v1.0";

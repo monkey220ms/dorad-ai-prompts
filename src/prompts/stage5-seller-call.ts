@@ -138,4 +138,4 @@ ${input.transcriptText}
   };
 }
 
-export const STAGE_5_PROMPT_VERSION = "stage5.v1.0";
+export const STAGE_5_PROMPT_VERSION = "stage5-seller-call.v1.0";

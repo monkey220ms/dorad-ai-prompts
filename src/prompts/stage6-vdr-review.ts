@@ -108,4 +108,5 @@ ${JSON.stringify(input.ddChecklist ?? [], null, 2)}
   };
 }
 
-export const STAGE_6_PROMPT_VERSION = "stage6.v1.0";
+export const STAGE_6_PROMPT_VERSION = "stage6-vdr-review.v1.0";
+

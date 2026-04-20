@@ -13,6 +13,11 @@ export * from "./prompts/stage8-model-builder.ts";
 export * from "./prompts/stage9-loi.ts";
 export * from "./prompts/stage10-ic-memo.ts";
 export * from "./prompts/stage11-sanity-check.ts";
+export * from "./prompts/stage12-deal-scorecard.ts";
+export * from "./prompts/stage13-diligence-questions.ts";
+export * from "./prompts/stage14-risk-register.ts";
+export * from "./prompts/stage15-valuation-range.ts";
+export * from "./prompts/stage15a-broker-outreach.ts";
 
 // Schemas
 export * from "./schemas/doc-classifier.ts";
@@ -27,3 +32,11 @@ export * from "./schemas/model-builder.ts";
 export * from "./schemas/loi.ts";
 export * from "./schemas/ic-memo.ts";
 export * from "./schemas/sanity-check.ts";
+export * from "./schemas/deal-scorecard.ts";
+export * from "./schemas/diligence-questions.ts";
+export * from "./schemas/risk-register.ts";
+export * from "./schemas/valuation-range.ts";
+export * from "./schemas/broker-outreach.ts";
+
+// Data
+export * from "./data/industry-benchmarks.ts";

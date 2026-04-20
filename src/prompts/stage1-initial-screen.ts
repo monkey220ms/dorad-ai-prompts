@@ -175,8 +175,8 @@ ${input.teaserText ? `<optional_teaser>\n${input.teaserText}\n</optional_teaser>
 }
 
 function fmtMoney(n: number | null | undefined): string {
-  if (n === null || n === undefined) return "not disclosed";
-  return `$${n.toLocaleString()}`;
+  if (n == null) return "?";
+  return `$${Math.round(n).toLocaleString()}`;
 }
 
-export const STAGE_1_PROMPT_VERSION = "stage1.v1.0";
+export const STAGE_1_PROMPT_VERSION = "stage1-initial-screen.v1.0";

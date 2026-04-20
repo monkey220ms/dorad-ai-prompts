@@ -59,6 +59,6 @@ export function assertComps(obj: unknown): asserts obj is CompsOutput {
     typeof agg.percentile_vs_peers === "number" &&
     (agg.percentile_vs_peers < 0 || agg.percentile_vs_peers > 100)
   ) {
-    throw new Error("aggregate.percentile_vs_peers must be 0-100");
+    throw new Error("aggregate.percentile_vs_peers must be 0-100 when set");
   }
 }

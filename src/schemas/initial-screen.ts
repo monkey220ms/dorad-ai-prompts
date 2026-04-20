@@ -112,5 +112,21 @@ export function assertInitialScreen(obj: unknown): asserts obj is InitialScreenO
     if (!ALLOWED_PRIORITIES.includes(q.priority as QuestionPriority)) {
       throw new Error(`question.priority must be one of ${ALLOWED_PRIORITIES.join(", ")}`);
     }
+    if (typeof q.question !== "string" || q.question.length === 0) {
+      throw new Error("question.question required");
+    }
+  }
+  if (typeof o.suggested_next_step !== "string" || o.suggested_next_step.length === 0) {
+    throw new Error("suggested_next_step required");
+  }
+  if (typeof o.estimated_time_to_loi_days !== "number" || o.estimated_time_to_loi_days < 0) {
+    throw new Error("estimated_time_to_loi_days must be a non-negative number");
+  }
+  if (
+    typeof o.analyst_confidence_overall !== "number" ||
+    o.analyst_confidence_overall < 0 ||
+    o.analyst_confidence_overall > 1
+  ) {
+    throw new Error("analyst_confidence_overall must be 0..1");
   }
 }

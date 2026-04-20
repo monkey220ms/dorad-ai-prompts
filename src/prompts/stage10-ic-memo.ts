@@ -150,4 +150,4 @@ ${JSON.stringify(input.extractedFactIds ?? {}, null, 2)}
   };
 }
 
-export const STAGE_10_PROMPT_VERSION = "stage10.v1.0";
+export const STAGE_10_PROMPT_VERSION = "stage10-ic-memo.v1.0";

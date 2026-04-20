@@ -145,4 +145,4 @@ ${JSON.stringify(input.brokerAddbacks ?? [], null, 2)}
   };
 }
 
-export const STAGE_7_PROMPT_VERSION = "stage7.v1.0";
+export const STAGE_7_PROMPT_VERSION = "stage7-qofe.v1.0";
